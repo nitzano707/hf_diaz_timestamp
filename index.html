@@ -20,32 +20,33 @@
             }
 
             const audioFile = audioInput.files[0];
+            const reader = new FileReader();
+            reader.readAsArrayBuffer(audioFile);
+            reader.onload = async function () {
+                const audioData = reader.result;
 
-            // Fetch the audio file as a blob
-            const formData = new FormData();
-            formData.append('audio', audioFile);
-            formData.append('num_speakers', 3);
-            formData.append('min_speakers', 3);
-            formData.append('max_speakers', 3);
+                try {
+                    const apiUrl = "https://api-inference.huggingface.co/models/pyannote/speaker-diarization-3.1";
+                    const response = await fetch(apiUrl, {
+                        headers: {
+                            Authorization: "Bearer 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",
+                            "Content-Type": "application/octet-stream"
+                        },
+                        method: "POST",
+                        body: audioData
+                    });
 
-            // Connect to the Gradio SPACE API
-            try {
-                const apiUrl = "https://delik/pyannote-speaker-diarization-3-1.hf.space/run/process_audio"; // Replace with the actual SPACE API URL
-                const resultResponse = await fetch(apiUrl, {
-                    method: "POST",
-                    body: formData
-                });
+                    if (!response.ok) {
+                        throw new Error('Failed to process audio');
+                    }
 
-                if (!resultResponse.ok) {
-                    throw new Error('Failed to process audio');
+                    const result = await response.json();
+                    document.getElementById('result').innerText = JSON.stringify(result);
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing the audio.');
                 }
-
-                const result = await resultResponse.json();
-                document.getElementById('result').innerText = result.data[0];
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while processing the audio.');
-            }
+            };
         }
     </script>
 </body>
