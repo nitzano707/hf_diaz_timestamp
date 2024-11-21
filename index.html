@@ -22,22 +22,18 @@
             const audioFile = audioInput.files[0];
 
             // Fetch the audio file as a blob
-            const audioBlob = new Blob([audioFile], { type: audioFile.type });
+            const formData = new FormData();
+            formData.append('audio', audioFile);
+            formData.append('num_speakers', 3);
+            formData.append('min_speakers', 3);
+            formData.append('max_speakers', 3);
 
-            // Connect to the Gradio API using the provided GitHub URL
+            // Connect to the Gradio SPACE API
             try {
-                const apiUrl = "https://github.com/gradio-app/gradio/raw/main/test/test_files/audio_sample.wav";
+                const apiUrl = "https://delik/pyannote-speaker-diarization-3-1.hf.space/run/process_audio"; // Replace with the actual SPACE API URL
                 const resultResponse = await fetch(apiUrl, {
                     method: "POST",
-                    body: JSON.stringify({
-                        audio: audioBlob,
-                        num_speakers: 3,
-                        min_speakers: 3,
-                        max_speakers: 3
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                    body: formData
                 });
 
                 if (!resultResponse.ok) {
@@ -45,7 +41,7 @@
                 }
 
                 const result = await resultResponse.json();
-                document.getElementById('result').innerText = result[0];
+                document.getElementById('result').innerText = result.data[0];
             } catch (error) {
                 console.error('Error:', error);
                 alert('An error occurred while processing the audio.');
