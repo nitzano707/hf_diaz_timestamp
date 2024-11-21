@@ -20,6 +20,13 @@
             }
 
             const audioFile = audioInput.files[0];
+
+            // Verify that the file type is supported (e.g., wav or flac)
+            if (!['audio/wav', 'audio/flac'].includes(audioFile.type)) {
+                alert('Please select a WAV or FLAC audio file.');
+                return;
+            }
+
             const reader = new FileReader();
             reader.readAsArrayBuffer(audioFile);
             reader.onload = async function () {
@@ -30,7 +37,7 @@
                     const response = await fetch(apiUrl, {
                         headers: {
                             Authorization: "Bearer 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",
-                            "Content-Type": "application/octet-stream"
+                            "Content-Type": "audio/wav"
                         },
                         method: "POST",
                         body: audioData
